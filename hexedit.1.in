@@ -1,4 +1,4 @@
-.TH HEXEDIT 1 "12 July 1998"
+.TH HEXEDIT 1 "27 February 2017"
 .SH NAME
 hexedit \- view and edit files in hexadecimal or in ASCII
 .SH SYNOPSIS
@@ -225,7 +225,7 @@ You can find
 .I hexedit
 at 
 .br
-<https://github.com/pixel/hexedit/archive/@VERSION@.tar.gz>
+<https://github.com/Oscar65/hexedit/archive/@VERSION@.tar.gz>
 .SH TODO
 Anything you think could be nice...
 .SH LIMITATIONS
