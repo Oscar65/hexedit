@@ -19,12 +19,12 @@
 /*******************************************************************************/
 /* Mark functions */
 /*******************************************************************************/
-void markRegion(INT a, INT b) { int i; for (i = MAX(a - base, 0); i <= MIN(b - base, nbBytes - 1); i++) markIt(i); }
-void unmarkRegion(INT a, INT b) { int i; for (i = MAX(a - base, 0); i <= MIN(b - base, nbBytes - 1); i++) unmarkIt(i); }
+void markRegion(INT a, INT b) { INT i; for (i = MAX(a - base, 0); i <= MIN(b - base, nbBytes - 1); i++) markIt(i); }
+void unmarkRegion(INT a, INT b) { INT i; for (i = MAX(a - base, 0); i <= MIN(b - base, nbBytes - 1); i++) unmarkIt(i); }
 void markSelectedRegion(void) { markRegion(mark_min, mark_max); }
 void unmarkAll(void) { unmarkRegion(base, base + nbBytes - 1); }
-void markIt(int i) { bufferAttr[i] |= MARKED; }
-void unmarkIt(int i) { bufferAttr[i] &= ~MARKED; }
+void markIt(INT i) { bufferAttr[i] |= MARKED; }
+void unmarkIt(INT i) { bufferAttr[i] &= ~MARKED; }
 
 void copy_region(void) 
 {
@@ -52,7 +52,7 @@ void copy_region(void)
       INT min = MIN(p->base, mark_min);
       memcpy(copyBuffer + p->base - min, 
 	     p->vals + mark_min - min,
-	     MIN(p->base + p->size, mark_max) - MAX(p->base, mark_min) + 1);
+	     MIN(MIN(p->base + p->size, mark_max) - MAX(p->base, mark_min) + 1, p->size));
     }
   }
   unmarkAll();
@@ -94,7 +94,8 @@ void fill_with_string(void)
   char **last = hexOrAscii ? &lastFillWithStringHexa : &lastFillWithStringAscii;
   char tmp2[BLOCK_SEARCH_SIZE];
   unsigned char *tmp1;
-  int i, l1, l2;
+  size_t i;
+  size_t l1, l2;
 
   if (!mark_set) return;
   if (isReadOnly) { displayMessageAndWaitForKey("File is read-only!"); return; }
@@ -112,18 +113,20 @@ void fill_with_string(void)
     } else if (!hexStringToBinString(tmp2, &l2)) return;
   }
   tmp1 = malloc(l1);
-  for (i = 0; i < l1 - l2 + 1; i += l2) memcpy(tmp1 + i, tmp2, l2);
-  memcpy(tmp1 + i, tmp2, l1 - i);
-  addToEdited(mark_min, l1, tmp1);
-  readFile();
-  free(tmp1);
+  if (tmp1 != NULL) {
+    for (i = 0; i < l1 - l2 + 1; i += l2) memcpy(tmp1 + i, tmp2, l2);
+    memcpy(tmp1 + i, tmp2, l1 - i);
+    addToEdited(mark_min, l1, tmp1);
+    readFile();
+    free(tmp1);
+  } else {
+    displayMessageAndWaitForKey("Can't allocate that much memory");
+  }
 }
-
 
 void updateMarked(void)
 {
   if (base + cursor > oldbase + oldcursor) {
-
     if (mark_min == mark_max) {
       mark_max = base + cursor;
     } else if (oldbase + oldcursor == mark_min) {
@@ -138,11 +141,10 @@ void updateMarked(void)
     } else {
       mark_max = base + cursor;
     }
-
-  } else if (base + cursor < oldbase + oldcursor){
+  } else if (base + cursor < oldbase + oldcursor) {
     if (mark_min == mark_max) {
       mark_min = base + cursor;
-    } else if (oldbase + oldcursor == mark_max) {
+    } else if (oldbase + oldcursor >= mark_max) {
       if (base + cursor >= mark_min) {
 	mark_max = base + cursor;
 	unmarkRegion(mark_max + 1, oldbase + oldcursor);

@@ -82,12 +82,14 @@ int set_base(INT loc)
 
 int computeLineSize(void) { return computeCursorXPos(lineLength - 1, 0) + 1; }
 int computeCursorXCurrentPos(void) { return computeCursorXPos(cursor, hexOrAscii); }
-int computeCursorXPos(int cursor, int hexOrAscii)
+int computeCursorXPos(INT cursor, int hexOrAscii)
 {
   int r = 11;
   int x = cursor % lineLength;
   int h = (hexOrAscii ? x : lineLength - 1);
-
+  int szBuffer = 100;
+  char buffer[szBuffer];
+  r += snprintf(buffer, szBuffer, "%08lX", base+cursor-x) - 8;
   r += normalSpaces * (h % blocSize) + (h / blocSize) * (normalSpaces * blocSize + 1) + (hexOrAscii && cursorOffset);
 
   if (!hexOrAscii) r += x + normalSpaces + 1;
@@ -102,7 +104,10 @@ int computeCursorXPos(int cursor, int hexOrAscii)
 /*******************************************************************************/
 void initCurses(void)
 {
-  initscr();
+  if ((initscr()) == NULL) {
+    fprintf(stderr, "Error calling ncurses initscr.\n");
+    exit(EXIT_FAILURE);
+  }
 
 #ifdef HAVE_COLORS
   if (colored) {
@@ -131,15 +136,10 @@ void initCurses(void)
     if (LINES <= 4) DIE("%s: term is too small (height)\n");
 
     blocSize = modes[maximized].blocSize;
-    if (lineLength == 0) {
-      /* put as many "blocSize" as can fit on a line */
-      for (lineLength = blocSize; computeLineSize() <= COLS; lineLength += blocSize);
-      lineLength -= blocSize;
-      if (lineLength == 0) DIE("%s: term is too small (width)\n");
-    } else {
-      if (computeLineSize() > COLS)
-	DIE("%s: term is too small (width) for selected line length\n");
-    }
+    for (lineLength = blocSize; computeLineSize() <= COLS; lineLength += blocSize);
+    lineLength -= blocSize;
+    if (lineLength == 0) DIE("%s: term is too small (width)\n");
+
     page = lineLength * (LINES - 1);
   }
   colsUsed = computeLineSize();
@@ -151,8 +151,17 @@ void exitCurses(void)
 {
   close(fd);
   clear();
-  refresh();
-  endwin();
+  
+  if (refresh() == ERR) {
+    fprintf(stderr, "%s:%d Error calling ncurses refresh.\n", __FILE__, __LINE__);
+  }
+  if (delwin(stdscr) == ERR) {
+    fprintf(stderr, "Error calling ncurses delwin.\n");
+  }
+  if (endwin() == ERR) {
+    fprintf(stderr, "Error calling ncurses endwin.\n");
+    exit(EXIT_FAILURE);
+  }
 }
 
 void display(void)
@@ -163,35 +172,48 @@ void display(void)
     move(i / lineLength, 0);
     displayLine(i, nbBytes);
   }
+
   for (; i < page; i += lineLength) {
     int j;
     move(i / lineLength, 0);
-    for (j = 0; j < colsUsed; j++) printw(" "); /* cleanup the line */
+    clrtoeol();
     move(i / lineLength, 0);
-    PRINTW(("%08lX", (int) (base + i)));
+    PRINTW(("%08lX", (size_t) (base + i)));
   }
-
   attrset(NORMAL);
   move(LINES - 1, 0);
-  for (i = 0; i < colsUsed; i++) printw("-");
+  int szBuffer = 100;
+  char buffer[szBuffer];
+  int len = snprintf(buffer, szBuffer, "%08lX", base + i) - 8;
+  for (i = 0; i < colsUsed + len; i++) printw("-");
+  clrtoeol();
   move(LINES - 1, 0);
   if (isReadOnly) i = '%';
   else if (edited) i = '*';
   else i = '-';
-  printw("-%c%c  %s       --0x%llX", i, i, baseName, base + cursor);
+#ifdef __i386__
+  printw("%c%c 0x%X", i, i, base + cursor);
+  if (MAX(fileSize, lastEditedLoc)) printw("/0x%X", getfilesize());
+  if (mode == bySector) printw("--sector %d", (base + cursor) / SECTOR_SIZE);
+  if (mark_set) printw("--sel 0x%X/0x%X--size 0x%X", mark_min, mark_max, mark_max - mark_min + 1);
+#else
+  printw("%c%c 0x%llX", i, i, base + cursor);
   if (MAX(fileSize, lastEditedLoc)) printw("/0x%llX", getfilesize());
   if (mode == bySector) printw("--sector %lld", (base + cursor) / SECTOR_SIZE);
-
+  if (mark_set) printw("--sel 0x%llX/0x%llX--size 0x%llX", mark_min, mark_max, mark_max - mark_min + 1);
+#endif
+  printw(" %s", baseName);
   move(cursor / lineLength, computeCursorXCurrentPos());
 }
 
-void displayLine(int offset, int max)
+void displayLine(size_t offset, size_t max)
 {
-  int i,mark_color=0;
+  size_t i;
+  int mark_color=0;
 #ifdef HAVE_COLORS
   mark_color = COLOR_PAIR(4) | A_BOLD;
 #endif
-  PRINTW(("%08lX   ", (int) (base + offset)));
+  PRINTW(("%08lX   ", (size_t) (base + offset)));
   for (i = offset; i < offset + lineLength; i++) {
     if (i > offset) MAXATTRPRINTW(bufferAttr[i] & MARKED, (((i - offset) % blocSize) ? " " : "  "));
     if (i < max) {
@@ -210,10 +232,12 @@ void displayLine(int offset, int max)
   }
   PRINTW(("  "));
   for (i = offset; i < offset + lineLength; i++) {
-    if (i >= max) PRINTW((" "));
+    if (i >= max) ATTRPRINTW(bufferAttr[i-1], (" "));
     else if (buffer[i] >= ' ' && buffer[i] < 127) ATTRPRINTW((cursor == i && hexOrAscii==1 ? mark_color : 0) | bufferAttr[i], ("%c", buffer[i]));
-    else ATTRPRINTW((cursor == i && hexOrAscii == 1 ? mark_color : 0) | bufferAttr[i], ("."));
+      else ATTRPRINTW((cursor == i && hexOrAscii == 1 ? mark_color : 0) | bufferAttr[i], ("."));
   }
+  PRINTW((" "));
+  clrtoeol();
 }
 
 void clr_line(int line) { move(line, 0); clrtoeol(); }
@@ -248,14 +272,20 @@ void displayMessageAndWaitForKey(char *msg)
   getch();
 }
 
-int displayMessageAndGetString(char *msg, char **last, char *p, int p_size)
+int displayMessageAndGetString(char *msg, char **last, char *p, size_t p_size)
 {
   int ret = TRUE;
 
   displayOneLineMessage(msg);
-  ungetstr(*last);
+  ungetstr(*last, p_size);
   echo();
-  getnstr(p, p_size - 1);
+  wchar_t ws[p_size];
+  //int is = swprintf(ws, p_size, L"%hs", p);
+  //if (is > 9999) echo();
+  //This is a bug in ncurses. Don't display utf8 chars in input
+  getn_wstr((wint_t *)ws, (int)(p_size+1)/*wcslen(p)+1*/);
+  int len = wcstombs(p, ws, p_size - 1);
+  if (len > 0) p[len] = 0;
   noecho();
   if (*p == '\0') {
     if (*last) strcpy(p, *last); else ret = FALSE;
@@ -266,11 +296,27 @@ int displayMessageAndGetString(char *msg, char **last, char *p, int p_size)
   return ret;
 }
 
-void ungetstr(char *s)
+void ungetstr(char *s, size_t p_size)
 {
-  char *p;
-  if (s)
-    for (p = s + strlen(s) - 1; p >= s; p--) ungetch(*p);
+  wchar_t ws[p_size];
+  wchar_t *w;
+  bool utf8 = false;
+
+  if (s) {
+    swprintf(ws, p_size, L"%hs", s);
+    int i;
+    for (i=0; i<wcslen(ws); i++) {
+      if (ws[i] > 127) utf8 =true;
+    }
+    if ((wcslen(ws) < 75) && (!utf8)) {
+      for (w = ws + wcslen(ws) - 1; w >= ws; w--) {
+        if (unget_wch(*w) != OK) {
+          printf("unget_wch ERROR!");
+          break;
+        }
+      }
+    }
+  } 
 }
 
 int get_number(INT *i)
@@ -281,8 +327,8 @@ int get_number(INT *i)
   getnstr(tmp, BLOCK_SEARCH_SIZE - 1);
   noecho();
   if (strbeginswith(tmp, "0x"))
-    err = sscanf(tmp + strlen("0x"), "%llx", i);
+    err = sscanf(tmp + strlen("0x"), "%lx", i);
   else
-    err = sscanf(tmp, "%lld", i);
+    err = sscanf(tmp, "%ld", i);
   return err == 1;
 }

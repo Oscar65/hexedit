@@ -15,7 +15,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*/
 #include "hexedit.h"
-
+#include <stdlib.h>
 
 void setToChar(int i, unsigned char c)
 {
@@ -57,7 +57,7 @@ void discardEdited(void)
   if (mark_max >= biggestLoc) mark_max = biggestLoc - 1;
 }
 
-void addToEdited(INT base, int size, unsigned char *vals)
+void addToEdited(INT base, size_t size, unsigned char *vals)
 {
   typePage *p, *q = NULL;
   for (p = edited; p; q = p, p = p->next) {
@@ -67,51 +67,83 @@ void addToEdited(INT base, int size, unsigned char *vals)
       freePage(p); p = q;
       if (q == NULL) {
 	p = edited;
-	break;
+	if (p && p->base >= base + size) break;
+	if (p == NULL) break;
       }
     }
   }
 
-  if (q && base <= q->base + q->size && q->base <= base + size) {
-    /* chevauchement (?? how to say it in english ??) */
+  if (q && base <= q->base + q->size && q->base <= base + size && llabs(q->base - base) < MAX_SIZE_PAGE) {
+    /* chevauchement (?? how to say it in english ??) overlap? */
     INT min, max;
     unsigned char *s;
     min = MIN(q->base, base);
     if (p && base + size == p->base) {
       max = p->base + p->size;
       s = malloc(max - min);
-      memcpy(s + q->base - min, q->vals, q->size);
-      memcpy(s + base - min, vals, size);
-      memcpy(s + p->base - min, p->vals, p->size);
-      free(q->vals); q->vals = s;
-      q->next = p->next;
-      freePage(p);
+      if (s != NULL) {
+        memcpy(s + q->base - min, q->vals, q->size);
+        memcpy(s + base - min, vals, size);
+        memcpy(s + p->base - min, p->vals, p->size);
+        free(q->vals); q->vals = s;
+        q->next = p->next;
+        freePage(p);
+      } else {
+        displayMessageAndWaitForKey("Can't allocate that much memory");
+        return;
+      }
     } else {
       max = MAX(q->base + q->size, base + size);
       s = malloc(max - min);
-      memcpy(s + q->base - min, q->vals, q->size);
-      memcpy(s + base - min, vals, size);
-      free(q->vals); q->vals = s;
+      if (s != NULL) {
+        memcpy(s + q->base - min, q->vals, q->size);
+        memcpy(s + base - min, vals, size);
+        free(q->vals); q->vals = s;
+      } else {
+        displayMessageAndWaitForKey("Can't allocate that much memory");
+        return;
+      }
     }
     q->base = min;
     q->size = max - min;
-  } else if (p && base + size == p->base) {
+  } else if (p && base + size == p->base && llabs(p->base - base) < MAX_SIZE_PAGE) {
     unsigned char *s = malloc(p->base + p->size - base);
-    memcpy(s, vals, size);
-    memcpy(s + p->base - base, p->vals, p->size);
-    free(p->vals); p->vals = s;
-    p->size = p->base + p->size - base;
-    p->base = base;
+    if (s != NULL) {
+      memcpy(s, vals, size);
+      memcpy(s + p->base - base, p->vals, p->size);
+      free(p->vals); p->vals = s;
+      p->size = p->base + p->size - base;
+      p->base = base;
+    } else {
+      displayMessageAndWaitForKey("Can't allocate that much memory");
+      return;
+    }
   } else {
-    typePage *r = newPage(base, size);
-    memcpy(r->vals, vals, size);
-    if (q) q->next = r; else edited = r;
-    r->next = p;
+    INT i;
+    for (i = base; i < base + size; i = i + MAX_SIZE_PAGE) {
+      size_t pageSize = ((i + MAX_SIZE_PAGE) - (base + size) < MAX_SIZE_PAGE) ? base + size - i : MAX_SIZE_PAGE;
+      typePage *r = newPage(i, pageSize);
+      if (r) {
+        if (r->vals) {
+          memcpy(r->vals, vals + (i - base), pageSize);
+          if (q) q->next = r; else edited = r;
+          r->next = p;
+          q = r;
+        } else {
+          displayMessageAndWaitForKey("Can't allocate that much memory");
+          return;
+        }
+      } else {
+        displayMessageAndWaitForKey("Can't allocate that much memory");
+        return;
+      }
+      if (pageSize < MAX_SIZE_PAGE) break;
+    }
   }
   updatelastEditedLoc();
 }
 
-void removeFromEdited(INT base, int size)
+void removeFromEdited(INT base, size_t size)
 {
   typePage *p, *q = NULL;
   for (p = edited; p; p ? (q = p, p = p->next) : (q = NULL, p = edited)) {
@@ -130,17 +162,22 @@ void removeFromEdited(INT base, int size)
       if (base < p->base + p->size) p->size -= p->base + p->size - base;      
     } else {
       q = newPage(base + size, p->base + p->size - base - size);
-      memcpy(q->vals, p->vals + base + size - p->base, q->size);
-      q->next = p->next;
-      p->next = q;      
-      p->size -= p->base + p->size - base;
-      break;
+      if (q != NULL) {
+        memcpy(q->vals, p->vals + base + size - p->base, q->size);
+        q->next = p->next;
+        p->next = q;      
+        p->size -= p->base + p->size - base;
+        break;
+      } else {
+        displayMessageAndWaitForKey("Can't allocate that much memory");
+        return;
+      }
     }
   }
   updatelastEditedLoc();
 }
 
-typePage *newPage(INT base, int size) 
+typePage *newPage(INT base, size_t size) 
 { 
   typePage *p = (typePage *) malloc(sizeof(typePage));
   p->base = base;
@@ -154,12 +191,3 @@ void freePage(typePage *page)
   free(page->vals);
   free(page);
 }
-
-
-
-
-
-
-
-
-

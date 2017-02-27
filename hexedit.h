@@ -13,7 +13,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <curses.h>
+#include <ncurses.h>
 #include <ctype.h>
 #include <signal.h>
 #if HAVE_SYS_WAIT_H
@@ -26,9 +26,11 @@
 #if HAVE_SYS_MOUNT_H
 #include <sys/mount.h> /* for BLKGETSIZE */
 #endif
+#include <locale.h>
 
 
 #define INT off_t
+extern long MAX_SIZE_PAGE;
 
 /*******************************************************************************/
 /* Macros */
@@ -40,7 +42,7 @@
   #define CTRL(c) ((c) & 0x1F)
 #endif
 #define ALT(c) ((c) | 0xa0)
-#define DIE(M) { exitCurses(); fprintf(stderr, M, progName); exit(1); }
+#define DIE(M) { fprintf(stderr, M, progName); exit(1); }
 #define FREE(p) if (p) free(p)
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -82,7 +84,7 @@ typedef struct _typePage {
   struct _typePage *next;
 
   INT base;
-  int size;
+  size_t size;
   unsigned char *vals;
 } typePage;
 
@@ -94,16 +96,19 @@ typedef struct _typePage {
 extern INT lastEditedLoc, biggestLoc, fileSize;
 extern INT mark_min, mark_max, mark_set;
 extern INT base, oldbase;
-extern int normalSpaces, cursor, cursorOffset, hexOrAscii;
-extern int cursor, blocSize, lineLength, colsUsed, page;
-extern int isReadOnly, fd, nbBytes, oldcursor, oldattr, oldcursorOffset;
+//extern int normalSpaces, cursor, cursorOffset, hexOrAscii;
+//extern int cursor, blocSize, lineLength, colsUsed, page;
+//extern int isReadOnly, fd, nbBytes, oldcursor, oldattr, oldcursorOffset;
+extern int normalSpaces, hexOrAscii;
+extern int blocSize, lineLength, colsUsed, page;
+extern int isReadOnly, fd, nbBytes, oldattr;
+extern INT cursor, cursorOffset, oldcursor, oldcursorOffset; 
 extern int sizeCopyBuffer, *bufferAttr;
 extern char *progName, *fileName, *baseName;
 extern unsigned char *buffer, *copyBuffer;
 extern typePage *edited;
 
 extern char *lastFindFile, *lastYankToAFile, *lastAskHexString, *lastAskAsciiString, *lastFillWithStringHexa, *lastFillWithStringAscii;
-
 
 /*******************************************************************************/
 /* Miscellaneous functions declaration */
@@ -118,7 +123,7 @@ void readFile(void);
 int findFile(void);
 int computeLineSize(void);
 int computeCursorXCurrentPos(void);
-int computeCursorXPos(int cursor, int hexOrAscii);
+int computeCursorXPos(INT cursor, int hexOrAscii);
 void updateMarked(void);
 int ask_about_save(void);
 int ask_about_save_and_redisplay(void);
@@ -130,9 +135,9 @@ void setToChar(int i, unsigned char c);
 /* Pages handling functions declaration */
 /*******************************************************************************/
 void discardEdited(void);
-void addToEdited(INT base, int size, unsigned char *vals);
-void removeFromEdited(INT base, int size);
-typePage *newPage(INT base, int size);
+void addToEdited(INT base, size_t size, unsigned char *vals);
+void removeFromEdited(INT base, size_t size);
+typePage *newPage(INT base, size_t size);
 void freePage(typePage *page);
 
 
@@ -150,14 +155,14 @@ int set_base(INT loc);
 void initCurses(void);
 void exitCurses(void);
 void display(void);
-void displayLine(int offset, int max);
+void displayLine(size_t offset, size_t max);
 void clr_line(int line);
 void displayCentered(char *msg, int line);
 void displayOneLineMessage(char *msg);
 void displayTwoLineMessage(char *msg1, char *msg2);
 void displayMessageAndWaitForKey(char *msg);
-int displayMessageAndGetString(char *msg, char **last, char *p, int p_size);
-void ungetstr(char *s);
+int displayMessageAndGetString(char *msg, char **last, char *p, size_t p_size);
+void ungetstr(char *s, size_t p_size);
 int get_number(INT *i);
 
 
@@ -175,8 +180,8 @@ void markRegion(INT a, INT b);
 void unmarkRegion(INT a, INT b);
 void markSelectedRegion(void);
 void unmarkAll(void);
-void markIt(int i);
-void unmarkIt(int i);
+void markIt(INT i);
+void unmarkIt(INT i);
 void copy_region(void);
 void yank(void);
 void yank_to_a_file(void);
@@ -195,10 +200,10 @@ int setHighBits(int p, int val);
 char *strconcat3(char *a, char *b, char *c);
 int hexCharToInt(int c);
 int not(int b);
-char *mymemmem(char *a, int sizea, char *b, int sizeb);
-char *mymemrmem(char *a, int sizea, char *b, int sizeb);
+char *mymemmem(char *a, size_t sizea, char *b, size_t sizeb);
+char *mymemrmem(char *a, size_t sizea, char *b, size_t sizeb);
 int is_file(char *name);
-int hexStringToBinString(char *p, int *l);
+int hexStringToBinString(char *p, size_t *l);
 
 /*******************************************************************************/
 /* Functions provided for OSs that don't have them */

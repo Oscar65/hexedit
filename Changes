@@ -1,3 +1,28 @@
+june/july/august 2016-feb 2017:
+	- version 1.4.0
+        - Now use 64 bits pointers.
+	- Fix bug that returns "Segmentation fault (core dumped)" when use fill for selection size bigger than 0x7FFFFFFE.
+	- Fix copy & paste with an modified byte and an unmodified byte and a modified byte, pasting unmodified byte as 00.
+	- Added two digits in address (now 10 digits) to allow adress until a Terabyte.
+	- Added -v or --version in parameters.
+	- Now internal blocks are of size _SC_PAGESIZE x 1024 * 10.
+	- Changed internal pointers to 64 bits in x86_64 system.
+	- Added selected at bottom line.
+	- Fix issue when selected region reachs beyond the end of file and user go up with cursor.
+	- Fix white square when input file name has non ascii chars (utf8) and in bottom line with file name.
+	- Fix clean garbage chars of file name on rigth of ascii text after press F3 when file name surpass ascii text.
+        - Tested with files of size 10Tb.
+        - Leave position to 8 chars and delete to end.
+        - Cursor goes mad when position is bigger than 8 digits.
+        - Fix: ASCII column left garbage going from end of file to beginning for a 16Gb file.
+        - Fix: Edit ASCII cursor moved.
+        - Fix: If select last line at end of file selects next blank line.na la siguiente línea vacía.
+        - Fix: Delete chars at end rigth if last line is empty.
+        - Fix: I think is a ncurse bug. If filename has utf8 chars F3 it doesn't show these chars. In that case doesn't shows the file name and pressing RETURN
+          loads the file.
+        - Fix: If with F3 the file name is very long shows errors. I solved limiting to 75 chars filename. If bigger doesn't shows filename and RETURN loads it.
+        - Cannot see utf8 chars in ASCII column. Is not a bug because utf8 chars are more than 1 char.
+
 novembre 2016:
 	- mark cursor position in both HEX and ASCII
 	- skip whitespace when parsing hex-strings

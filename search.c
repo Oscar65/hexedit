@@ -16,13 +16,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*/
 #include "hexedit.h"
 
-static int searchA(char **string, int *sizea, char *tmp, int tmp_size);
+static int searchA(char **string, size_t *sizea, char *tmp, size_t tmp_size);
 static void searchB(INT loc, char *string);
 
 /*******************************************************************************/
 /* Search functions */
 /*******************************************************************************/
-static int searchA(char **string, int *sizea, char *tmp, int tmp_size)
+static int searchA(char **string, size_t *sizea, char *tmp, size_t tmp_size)
 {
   char *msg = hexOrAscii ? "Hexa string to search: " : "Ascii string to search: ";
   char **last = hexOrAscii ? &lastAskHexString : &lastAskAsciiString;
@@ -55,7 +55,7 @@ static void searchB(INT loc, char *string)
 void search_forward(void)
 {
   char *p, *string, tmp[BLOCK_SEARCH_SIZE], tmpstr[BLOCK_SEARCH_SIZE];
-  int quit, sizea, sizeb;
+  size_t quit, sizea, sizeb;
   INT blockstart;
 
   if (!searchA(&string, &sizea, tmp, sizeof(tmp))) return;
@@ -80,7 +80,7 @@ void search_forward(void)
 void search_backward(void)
 {
   char *p, *string, tmp[BLOCK_SEARCH_SIZE], tmpstr[BLOCK_SEARCH_SIZE];
-  int quit, sizea, sizeb;
+  size_t quit, sizea, sizeb;
   INT blockstart;
 
   if (!searchA(&string, &sizea, tmp, sizeof(tmp))) return;

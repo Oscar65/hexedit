@@ -113,7 +113,7 @@ void *memrchr(const void *s, int c, size_t n)
 }
 #endif
 
-char *mymemmem(char *a, int sizea, char *b, int sizeb)
+char *mymemmem(char *a, size_t sizea, char *b, size_t sizeb)
 {
 #ifdef HAVE_MEMMEM
   return memmem(a, sizea, b, sizeb);
@@ -133,7 +133,7 @@ char *mymemmem(char *a, int sizea, char *b, int sizeb)
 #endif
 }
 
-char *mymemrmem(char *a, int sizea, char *b, int sizeb)
+char *mymemrmem(char *a, size_t sizea, char *b, size_t sizeb)
 {
 #ifdef HAVE_MEMRMEM
   return memrmem(a, sizea, b, sizeb);
@@ -153,28 +153,23 @@ char *mymemrmem(char *a, int sizea, char *b, int sizeb)
 }
 
 
-int hexStringToBinString(char *p, int *l)
+int hexStringToBinString(char *p, size_t *l)
 {
   int i;
-  int j;
 
-  for (i = 0, j = 0; i < *l; i++, j++) {
-    if( isspace(p[i]) ) {
-      j--;
-      continue;
-    }
+  for (i = 0; i < *l; i++) {
     if (!isxdigit(p[i])) {
       displayMessageAndWaitForKey("Invalid hexa string");
       return FALSE;
     }
-    p[j / 2] = ((j % 2) ? setLowBits : setHighBits)(p[j / 2], hexCharToInt(p[i]));
+    p[i / 2] = ((i % 2) ? setLowBits : setHighBits)(p[i / 2], hexCharToInt(p[i]));
   }
 
-  if ((j % 2)) {
+  if ((*l % 2)) {
     displayMessageAndWaitForKey("Must be an even number of chars");
     return FALSE;
   }
-  *l = j / 2;
+  *l /= 2;
   return TRUE;
 }
 
