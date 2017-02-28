@@ -279,10 +279,7 @@ int displayMessageAndGetString(char *msg, char **last, char *p, size_t p_size)
   displayOneLineMessage(msg);
   ungetstr(*last, p_size);
   echo();
-  wchar_t ws[p_size];
-  getn_wstr((wint_t *)ws, (int)(p_size+1)/*wcslen(p)+1*/);
-  int len = wcstombs(p, ws, p_size - 1);
-  if (len > 0) p[len] = 0;
+  getnstr(p, p_size - 1);
   noecho();
   if (*p == '\0') {
     if (*last) strcpy(p, *last); else ret = FALSE;

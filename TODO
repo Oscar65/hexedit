@@ -1,2 +1,1 @@
-Load file F3 doesn't work in Cygwin 64 (it works on 1.2.13 version).
 32 Bits kernel doesn't load files greater than 1G (version 1.2.13 load these files).
