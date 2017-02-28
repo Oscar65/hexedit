@@ -3,7 +3,7 @@
 hexedit \- view and edit files in hexadecimal or in ASCII
 .SH SYNOPSIS
 .I hexedit
-[\-s | \-\-sector] [\-m | \-\-maximize] [\-l<n> | \-\-linelength <n>] [\-h | \-\-help] [filename]
+[\-s | \-\-sector] [\-m | \-\-maximize] [\-l<n> | \-\-linelength <n>] [\-h | \-\-help] [\-v | \-\-version] [filename]
 .SH DESCRIPTION
 .LP
 .I hexedit
@@ -26,6 +26,9 @@ Explicitly set the number of bytes to display per line to <n>.
 .TP
 .I "\-h, \-\-help"
 Show the usage.
+.TP
+.I "\-v, \-\-version"
+Show version and license.
 .SH COMMANDS (quickly)
 .SS Moving
 .nf
@@ -214,6 +217,7 @@ od(1), hdump(1), hexdump(1), bpe(1), hexed(1), beav(1).
 Pixel (Pascal Rigaux) <pixel@rigaux.org>, 
 .br
 Home page is <http://rigaux.org/>.
+Upgrade to 1.4 by Oscar Megia Lopez <megia.oscar@gmail.com>,
 .SH UNRESTRICTIONS
 .I hexedit
 is Open Source; anyone may redistribute copies of 
