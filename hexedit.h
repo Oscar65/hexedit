@@ -96,9 +96,6 @@ typedef struct _typePage {
 extern INT lastEditedLoc, biggestLoc, fileSize;
 extern INT mark_min, mark_max, mark_set;
 extern INT base, oldbase;
-//extern int normalSpaces, cursor, cursorOffset, hexOrAscii;
-//extern int cursor, blocSize, lineLength, colsUsed, page;
-//extern int isReadOnly, fd, nbBytes, oldcursor, oldattr, oldcursorOffset;
 extern int normalSpaces, hexOrAscii;
 extern int blocSize, lineLength, colsUsed, page;
 extern int isReadOnly, fd, nbBytes, oldattr;
