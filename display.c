@@ -280,9 +280,6 @@ int displayMessageAndGetString(char *msg, char **last, char *p, size_t p_size)
   ungetstr(*last, p_size);
   echo();
   wchar_t ws[p_size];
-  //int is = swprintf(ws, p_size, L"%hs", p);
-  //if (is > 9999) echo();
-  //This is a bug in ncurses. Don't display utf8 chars in input
   getn_wstr((wint_t *)ws, (int)(p_size+1)/*wcslen(p)+1*/);
   int len = wcstombs(p, ws, p_size - 1);
   if (len > 0) p[len] = 0;
