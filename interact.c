@@ -294,7 +294,6 @@ static void save_buffer(void)
   } 
   edited = NULL;
   if (lastEditedLoc > fileSize) fileSize = lastEditedLoc;
-  lastEditedLoc = 0;
   memset(bufferAttr, A_NORMAL, page * sizeof(*bufferAttr));
   if (displayedmessage) {
     displayMessageAndWaitForKey("Unwritten changes have been discarded");
