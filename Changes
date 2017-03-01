@@ -1,3 +1,11 @@
+february 2017
+	- version 1.4.1
+        - Fixed bug when copy 0x1000 bytes at end, leave cursor beyond end of file and exit with CTRL+X. Returns this error:
+            display.c:156 Error calling ncurses refresh.
+            Error calling ncurses delwin.
+            the long seek failed (-1 instead of 1073770596), leaving :(
+          The bug was because readFile uses pointer buffer deleted before in function quit().
+
 june/july/august 2016-feb 2017:
 	- version 1.4.0
         - Now use 64 bits pointers.
