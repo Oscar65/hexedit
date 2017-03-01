@@ -32,9 +32,6 @@ INT base, oldbase;
 INT lastEditedLoc, biggestLoc, fileSize;
 INT mark_min, mark_max, mark_set;
 INT base, oldbase;
-//int normalSpaces, cursor, cursorOffset, hexOrAscii;
-//int cursor, blocSize, lineLength, colsUsed, page;
-//int isReadOnly, fd, nbBytes, oldcursor, oldattr, oldcursorOffset;
 int normalSpaces, hexOrAscii;
 int blocSize, lineLength, colsUsed, page;
 int isReadOnly, fd, nbBytes, oldattr;
@@ -143,12 +140,12 @@ void init(void)
 
 void quit(void)
 {
+  discardEdited();
   exitCurses();
   free(fileName);
   free(buffer);
   free(bufferAttr);
   FREE(copyBuffer);
-  discardEdited();
   FREE(lastFindFile); FREE(lastYankToAFile); FREE(lastAskHexString); FREE(lastAskAsciiString); FREE(lastFillWithStringHexa);
   FREE(lastFillWithStringAscii);
   exit(0);
