@@ -191,17 +191,10 @@ void display(void)
   if (isReadOnly) i = '%';
   else if (edited) i = '*';
   else i = '-';
-#ifdef __i386__
-  printw("%c%c 0x%X", i, i, base + cursor);
-  if (MAX(fileSize, lastEditedLoc)) printw("/0x%X", getfilesize());
-  if (mode == bySector) printw("--sector %d", (base + cursor) / SECTOR_SIZE);
-  if (mark_set) printw("--sel 0x%X/0x%X--size 0x%X", mark_min, mark_max, mark_max - mark_min + 1);
-#else
   printw("%c%c 0x%llX", i, i, base + cursor);
   if (MAX(fileSize, lastEditedLoc)) printw("/0x%llX", getfilesize());
   if (mode == bySector) printw("--sector %lld", (base + cursor) / SECTOR_SIZE);
   if (mark_set) printw("--sel 0x%llX/0x%llX--size 0x%llX", mark_min, mark_max, mark_max - mark_min + 1);
-#endif
   printw(" %s", baseName);
   move(cursor / lineLength, computeCursorXCurrentPos());
 }
