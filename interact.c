@@ -449,7 +449,7 @@ int key_to_function(int key)
     case '\r':
     case KEY_ENTER:
       if (mode == bySector) {
-	goto_sector();
+        goto_sector();
       } else {
         cursorOffset = 0;
         goto_char();
