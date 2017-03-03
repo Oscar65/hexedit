@@ -448,7 +448,12 @@ int key_to_function(int key)
     case '\n':
     case '\r':
     case KEY_ENTER:
-      if (mode == bySector) goto_sector(); else goto_char();
+      if (mode == bySector) {
+	goto_sector();
+      } else {
+         cursorOffset = 0;
+	 goto_char();
+      }
       break;
 
     case CTRL('W'):
