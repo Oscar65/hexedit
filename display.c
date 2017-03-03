@@ -184,7 +184,7 @@ void display(void)
   move(LINES - 1, 0);
   int szBuffer = 100;
   char buffer[szBuffer];
-  int len = snprintf(buffer, szBuffer, "%08lX", base + i) - 8;
+  int len = snprintf(buffer, szBuffer, "%08llX", base + i) - 8;
   for (i = 0; i < colsUsed + len; i++) printw("-");
   clrtoeol();
   move(LINES - 1, 0);
