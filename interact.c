@@ -451,8 +451,8 @@ int key_to_function(int key)
       if (mode == bySector) {
 	goto_sector();
       } else {
-         cursorOffset = 0;
-	 goto_char();
+        cursorOffset = 0;
+        goto_char();
       }
       break;
 
