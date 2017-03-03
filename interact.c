@@ -342,11 +342,13 @@ int key_to_function(int key)
     {
     case KEY_RIGHT:
     case CTRL('F'):
+      if (!hexOrAscii) cursorOffset = 0;
       forward_char();
       break;
 
     case KEY_LEFT:
     case CTRL('B'):
+      if (!hexOrAscii) cursorOffset = 0;
       backward_char();
       break;
 
