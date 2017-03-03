@@ -1,3 +1,0 @@
-If from 0x0 you go down with key down when you reach the end of page the last line does not refresh (is clear with actual address).
-If you press CTRL+L it refreshes. If I add refresh() at end of display() does not solve this issue, so I think is a curses bug.
-It happens in any column.
