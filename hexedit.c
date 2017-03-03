@@ -71,7 +71,7 @@ int main(int argc, char **argv)
       if (streq(*argv, "-s") || streq(*argv, "--sector"))
 	mode = bySector;
       else if (streq(*argv, "-v") || streq(*argv, "--version")) {
-        printf("version 1.4.4\n\n");
+        printf("version 1.4.5\n\n");
    	printf("Copyright (C) 1998 Pixel (Pascal Rigaux). Updated by Oscar Megía López <megia.oscar@gmail.com>.\n");
    	printf("This program is free software; you can redistribute it and/or modify\n");
    	printf("it under the terms of the GNU General Public License as published by\n");

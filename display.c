@@ -89,7 +89,7 @@ int computeCursorXPos(INT cursor, int hexOrAscii)
   int h = (hexOrAscii ? x : lineLength - 1);
   int szBuffer = 100;
   char buffer[szBuffer];
-  r += snprintf(buffer, szBuffer, "%08lX", base+cursor-x) - 8;
+  r += snprintf(buffer, szBuffer, "%08llX", base+cursor-x) - 8;
   r += normalSpaces * (h % blocSize) + (h / blocSize) * (normalSpaces * blocSize + 1) + (hexOrAscii && cursorOffset);
 
   if (!hexOrAscii) r += x + normalSpaces + 1;
@@ -178,7 +178,7 @@ void display(void)
     move(i / lineLength, 0);
     clrtoeol();
     move(i / lineLength, 0);
-    PRINTW(("%08lX", (size_t) (base + i)));
+    PRINTW(("%08llX", (base + i)));
   }
   attrset(NORMAL);
   move(LINES - 1, 0);
@@ -206,7 +206,7 @@ void displayLine(size_t offset, size_t max)
 #ifdef HAVE_COLORS
   mark_color = COLOR_PAIR(4) | A_BOLD;
 #endif
-  PRINTW(("%08lX   ", (size_t) (base + offset)));
+  PRINTW(("%08llX   ", (base + offset)));
   for (i = offset; i < offset + lineLength; i++) {
     if (i > offset) MAXATTRPRINTW(bufferAttr[i] & MARKED, (((i - offset) % blocSize) ? " " : "  "));
     if (i < max) {
