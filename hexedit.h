@@ -200,7 +200,7 @@ int not(int b);
 char *mymemmem(char *a, size_t sizea, char *b, size_t sizeb);
 char *mymemrmem(char *a, size_t sizea, char *b, size_t sizeb);
 int is_file(char *name);
-int hexStringToBinString(char *p, size_t *l);
+int hexStringToBinString(char *p, INT *l);
 
 /*******************************************************************************/
 /* Functions provided for OSs that don't have them */

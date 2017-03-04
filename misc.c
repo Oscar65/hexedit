@@ -152,8 +152,7 @@ char *mymemrmem(char *a, size_t sizea, char *b, size_t sizeb)
 #endif
 }
 
-
-int hexStringToBinString(char *p, size_t *l)
+int hexStringToBinString(char *p, INT *l)
 {
   int i;
 

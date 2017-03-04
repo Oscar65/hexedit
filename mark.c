@@ -94,8 +94,8 @@ void fill_with_string(void)
   char **last = hexOrAscii ? &lastFillWithStringHexa : &lastFillWithStringAscii;
   char tmp2[BLOCK_SEARCH_SIZE];
   unsigned char *tmp1;
-  size_t i;
-  size_t l1, l2;
+  INT i;
+  INT l1, l2;
 
   if (!mark_set) return;
   if (isReadOnly) { displayMessageAndWaitForKey("File is read-only!"); return; }
@@ -112,16 +112,24 @@ void fill_with_string(void)
       *tmp2 = hexCharToInt(*tmp2);
     } else if (!hexStringToBinString(tmp2, &l2)) return;
   }
-  tmp1 = malloc(l1);
-  if (tmp1 != NULL) {
-    for (i = 0; i < l1 - l2 + 1; i += l2) memcpy(tmp1 + i, tmp2, l2);
-    memcpy(tmp1 + i, tmp2, l1 - i);
-    addToEdited(mark_min, l1, tmp1);
-    readFile();
-    free(tmp1);
-  } else {
-    displayMessageAndWaitForKey("Can't allocate that much memory");
+#ifdef __i386__
+  if (l1 > 0xffffffff) {
+    displayMessageAndWaitForKey("Kernel 32Bits can't allocate that much memory");
+  } else { 
+#endif
+    tmp1 = malloc(l1);
+    if (tmp1 != NULL) {
+      for (i = 0; i < l1 - l2 + 1; i += l2) memcpy(tmp1 + i, tmp2, l2);
+      memcpy(tmp1 + i, tmp2, l1 - i);
+      addToEdited(mark_min, l1, tmp1);
+      readFile();
+      free(tmp1);
+    } else {
+      displayMessageAndWaitForKey("Can't allocate that much memory");
+    }
+#ifdef __i386__
   }
+#endif
 }
 
 void updateMarked(void)
