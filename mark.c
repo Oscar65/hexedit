@@ -38,6 +38,12 @@ void copy_region(void)
     if (tolower(getch()) != 'y') return;
   }
   FREE(copyBuffer);
+#ifdef __i386__
+  if (sizeCopyBuffer > 0xffffffff) {
+    displayMessageAndWaitForKey("Kernel 32Bits can't allocate that much memory");
+    return;
+  }
+#endif
   if ((copyBuffer = malloc(sizeCopyBuffer)) == NULL) {
     displayMessageAndWaitForKey("Can't allocate that much memory");
     return;

@@ -8,7 +8,7 @@ AC_PREREQ(2.50)
 AC_INIT(hexedit.c)
 AC_CONFIG_HEADERS(config.h)
 
-define(TheVERSION, 1.4.8)
+define(TheVERSION, 1.4.9)
 
 PRODUCT=hexedit
 VERSION=TheVERSION

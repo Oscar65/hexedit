@@ -24,8 +24,6 @@
 INT lastEditedLoc, biggestLoc, fileSize;
 INT mark_min, mark_max, mark_set;
 INT base, oldbase;
-//int normalSpaces, cursor, cursorOffset, hexOrAscii;
-//int cursor, blocSize, lineLength, colsUsed, page;
 /*******************************************************************************/
 /* Global variables */
 /*******************************************************************************/
@@ -36,7 +34,8 @@ int normalSpaces, hexOrAscii;
 int blocSize, lineLength, colsUsed, page;
 int isReadOnly, fd, nbBytes, oldattr;
 INT cursor, cursorOffset, oldcursor, oldcursorOffset;
-int sizeCopyBuffer, *bufferAttr;
+int *bufferAttr;
+INT sizeCopyBuffer;
 char *progName, *fileName, *baseName;
 unsigned char *buffer, *copyBuffer;
 typePage *edited;
@@ -71,7 +70,7 @@ int main(int argc, char **argv)
       if (streq(*argv, "-s") || streq(*argv, "--sector"))
 	mode = bySector;
       else if (streq(*argv, "-v") || streq(*argv, "--version")) {
-        printf("version 1.4.8\n\n");
+        printf("version 1.4.9\n\n");
    	printf("Copyright (C) 1998 Pixel (Pascal Rigaux). Updated by Oscar Megía López <megia.oscar@gmail.com>.\n");
    	printf("This program is free software; you can redistribute it and/or modify\n");
    	printf("it under the terms of the GNU General Public License as published by\n");
