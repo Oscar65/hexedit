@@ -57,7 +57,7 @@ void discardEdited(void)
   if (mark_max >= biggestLoc) mark_max = biggestLoc - 1;
 }
 
-void addToEdited(INT base, size_t size, unsigned char *vals)
+void addToEdited(INT base, INT size, unsigned char *vals)
 {
   typePage *p, *q = NULL;
   for (p = edited; p; q = p, p = p->next) {
@@ -143,7 +143,7 @@ void addToEdited(INT base, size_t size, unsigned char *vals)
   updatelastEditedLoc();
 }
 
-void removeFromEdited(INT base, size_t size)
+void removeFromEdited(INT base, INT size)
 {
   typePage *p, *q = NULL;
   for (p = edited; p; p ? (q = p, p = p->next) : (q = NULL, p = edited)) {

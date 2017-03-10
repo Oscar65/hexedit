@@ -133,8 +133,8 @@ void setToChar(int i, unsigned char c);
 /* Pages handling functions declaration */
 /*******************************************************************************/
 void discardEdited(void);
-void addToEdited(INT base, size_t size, unsigned char *vals);
-void removeFromEdited(INT base, size_t size);
+void addToEdited(INT base, INT size, unsigned char *vals);
+void removeFromEdited(INT base, INT size);
 typePage *newPage(INT base, size_t size);
 void freePage(typePage *page);
 
