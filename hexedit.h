@@ -69,10 +69,10 @@ typedef struct {
   int blocSize, lineLength, page;
 } modeParams;
 
-extern modeParams modes[LAST];
+extern const modeParams modes[LAST];
 extern modeType mode;
 extern int colored;
-extern char *usage;
+extern const char * const usage;
 
 #define pressAnyKey "(press any key)"
 
@@ -151,15 +151,16 @@ int set_base(INT loc);
 /* Curses functions declaration */
 /*******************************************************************************/
 void initCurses(void);
+void initDisplay(void);
 void exitCurses(void);
 void display(void);
 void displayLine(size_t offset, size_t max);
 void clr_line(int line);
-void displayCentered(char *msg, int line);
-void displayOneLineMessage(char *msg);
-void displayTwoLineMessage(char *msg1, char *msg2);
-void displayMessageAndWaitForKey(char *msg);
-int displayMessageAndGetString(char *msg, char **last, char *p, size_t p_size);
+void displayCentered(const char *msg, int line);
+void displayOneLineMessage(const char *msg);
+void displayTwoLineMessage(const char *msg1, const char *msg2);
+void displayMessageAndWaitForKey(const char *msg);
+int displayMessageAndGetString(const char *msg, char **last, char *p, size_t p_size);
 void ungetstr(char *s, size_t p_size);
 int get_number(INT *i);
 

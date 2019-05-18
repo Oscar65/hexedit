@@ -42,14 +42,14 @@ typePage *edited;
 
 char *lastFindFile = NULL, *lastYankToAFile = NULL, *lastAskHexString = NULL, *lastAskAsciiString = NULL, *lastFillWithStringHexa = NULL, *lastFillWithStringAscii = NULL;
 
-modeParams modes[LAST] = {
+const modeParams modes[LAST] = {
   { 8, 16, 256 },
   { 4, 0, 0 },
 };
 modeType mode = maximized;
 int colored = FALSE;
 
-char * usage = "usage: %s [-s | --sector] [-m | --maximize]"
+const char * const usage = "usage: %s [-s | --sector] [-m | --maximize] [-l<n> | --linelength <n>]"
 #ifdef HAVE_COLORS 
      " [--color]"
 #endif 
@@ -91,7 +91,16 @@ int main(int argc, char **argv)
       else if (streq(*argv, "--color"))
 	colored = TRUE;
 #endif
-      else if (streq(*argv, "--")) {
+      else if (strbeginswith(*argv, "-l") || strbeginswith(*argv, "--linelength")) {
+	if (strbeginswith(*argv, "-l") && strlen(*argv) > 2)
+	  lineLength = atoi(*argv + 2);
+	else {
+	  argv++; argc--;
+	  lineLength = atoi(*argv);
+	}
+	if (lineLength < 0 || lineLength > 4096)
+	  DIE("illegal line length\n")
+      } else if (streq(*argv, "--")) {
 	argv++; argc--;
 	break;
       } else if (*argv[0] == '-')
@@ -103,7 +112,7 @@ int main(int argc, char **argv)
 
   init();
   if (argc == 1) {
-    fileName = strdup(*argv); 
+    fileName = strdup(*argv);
     openFile();
   }
   initCurses();

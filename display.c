@@ -102,12 +102,32 @@ int computeCursorXPos(INT cursor, int hexOrAscii)
 /*******************************************************************************/
 /* Curses functions */
 /*******************************************************************************/
+static void handleSigWinch(int sig)
+{
+  /*Close and refresh window to get new size*/
+  endwin();
+  refresh();
+
+  /*Reset to trigger recalculation*/
+  lineLength = 0;
+
+  clear();
+  initDisplay();
+  readFile();
+  display();
+}
+
 void initCurses(void)
 {
+  struct sigaction sa;
   if ((initscr()) == NULL) {
     fprintf(stderr, "Error calling ncurses initscr.\n");
     exit(EXIT_FAILURE);
   }
+
+  memset(&sa, 0, sizeof(struct sigaction));
+  sa.sa_handler = handleSigWinch;
+  sigaction(SIGWINCH, &sa, NULL);
 
 #ifdef HAVE_COLORS
   if (colored) {
@@ -120,6 +140,11 @@ void initCurses(void)
   init_pair(4, COLOR_BLUE, COLOR_YELLOW); /* current cursor position*/
 #endif
 
+  initDisplay();
+}
+
+void initDisplay(void)
+{
   refresh();
   raw();
   noecho();
@@ -136,15 +161,20 @@ void initCurses(void)
     if (LINES <= 4) DIE("%s: term is too small (height)\n");
 
     blocSize = modes[maximized].blocSize;
-    for (lineLength = blocSize; computeLineSize() <= COLS; lineLength += blocSize);
-    lineLength -= blocSize;
-    if (lineLength == 0) DIE("%s: term is too small (width)\n");
-
+    if (lineLength == 0) {
+      /* put as many "blocSize" as can fit on a line */
+      for (lineLength = blocSize; computeLineSize() <= COLS; lineLength += blocSize);
+      lineLength -= blocSize;
+      if (lineLength == 0) DIE("%s: term is too small (width)\n");
+    } else {
+      if (computeLineSize() > COLS)
+        DIE("%s: term is too small (width) for selected line length\n");
+    }
     page = lineLength * (LINES - 1);
   }
   colsUsed = computeLineSize();
-  buffer = malloc(page);
-  bufferAttr = malloc(page * sizeof(*bufferAttr));
+  buffer = realloc(buffer,page);
+  bufferAttr = realloc(bufferAttr,page * sizeof(*bufferAttr));
 }
 
 void exitCurses(void)
@@ -193,6 +223,7 @@ void display(void)
   else i = '-';
   printw("%c%c 0x%llX", i, i, base + cursor);
   if (MAX(fileSize, lastEditedLoc)) printw("/0x%llX", getfilesize());
+  printw("--%i%%", 100 * (base + cursor + getfilesize()/200) / getfilesize() );
   if (mode == bySector) printw("--sector %lld", (base + cursor) / SECTOR_SIZE);
   if (mark_set) printw("--sel 0x%llX/0x%llX--size 0x%llX", mark_min, mark_max, mark_max - mark_min + 1);
   printw(" %s", baseName);
@@ -235,14 +266,14 @@ void displayLine(size_t offset, size_t max)
 
 void clr_line(int line) { move(line, 0); clrtoeol(); }
 
-void displayCentered(char *msg, int line)
+void displayCentered(const char *msg, int line)
 {
   clr_line(line);
   move(line, (COLS - strlen(msg)) / 2);
   PRINTW(("%s", msg));
 }
 
-void displayOneLineMessage(char *msg)
+void displayOneLineMessage(const char *msg)
 {
   int center = page / lineLength / 2;
   clr_line(center - 1);
@@ -250,7 +281,7 @@ void displayOneLineMessage(char *msg)
   displayCentered(msg, center);
 }
 
-void displayTwoLineMessage(char *msg1, char *msg2)
+void displayTwoLineMessage(const char *msg1, const char *msg2)
 {
   int center = page / lineLength / 2;
   clr_line(center - 2);
@@ -259,13 +290,13 @@ void displayTwoLineMessage(char *msg1, char *msg2)
   displayCentered(msg2, center);
 }
 
-void displayMessageAndWaitForKey(char *msg)
+void displayMessageAndWaitForKey(const char *msg)
 {
   displayTwoLineMessage(msg, pressAnyKey);
   getch();
 }
 
-int displayMessageAndGetString(char *msg, char **last, char *p, size_t p_size)
+int displayMessageAndGetString(const char *msg, char **last, char *p, size_t p_size)
 {
   int ret = TRUE;
 

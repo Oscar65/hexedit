@@ -338,8 +338,13 @@ int key_to_function(int key)
   oldbase = base;
   /*printf("*******%d******\n", key);*/
 
-  switch (key) 
+  switch (key)
     {
+    case ERR:
+    case KEY_RESIZE:
+      /*no-op*/
+      break;
+
     case KEY_RIGHT:
     case CTRL('F'):
       if (!hexOrAscii) cursorOffset = 0;
@@ -664,7 +669,7 @@ static void escaped_command(void)
     break;
 
   case '[': 
-    for (i = 0;; i++) { tmp[i] = c = getch(); if (!isdigit(c)) break; }
+    for (i = 0; i < sizeof(tmp) - 1; i++) { tmp[i] = c = getch(); if (!isdigit(c)) break; }
     tmp[i + 1] = '\0';
     
     if (0);
