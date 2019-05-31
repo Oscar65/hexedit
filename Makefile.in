@@ -32,13 +32,6 @@ $(shell mkdir -p $(DEPDIR) >/dev/null)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
-#$(shell for X in $(SRCS); do \
-#			XXd=$$(echo $$X | sed -e 's/^/$(DEPDIR)\//' | sed -e 's/\.c$$/\.d/'); \
-#            if ! [ -f $$XXd ]; then \
-#				touch $$XXd; \
-#            fi; \
-#		done)
-
 all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)

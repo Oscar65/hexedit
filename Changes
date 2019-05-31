@@ -1,14 +1,14 @@
 may 2019
-    - Fix bug error (core dumped) when file size is 0 (in my fork).
-    - Updated Makefile.in to Generating Prerequisites Automatically, so every change in hexedit.h or config.h will rebuild all sources that include it.
-      Commented code to check if file .d exists in .d/ directory. If not exists delete the object file (.o) to rebuild the object file and at the same time
-      regenerate the prerequisite file (.d).
-      Added the way at http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ to solve three issues if you choose the solution from
-      4.3 Types of Prerequisites and updated to allow to rebuild source if not exist file .d.
+	- Fix bug error (core dumped) when file size is 0 (in my fork).
+	- Updated Makefile.in to Generating Prerequisites Automatically, so every change in hexedit.h or config.h will rebuild all sources that include it.
+            Commented code to check if file .d exists in .d/ directory. If not exists delete the object file (.o) to rebuild the object file and at the same
+	    time regenerate the prerequisite file (.d).
+	    Added the way at http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ to solve three issues if you choose the solution from
+	      4.3 Types of Prerequisites and updated to allow to rebuild source if not exist file .d.
 
-      Is neccessary execute
-	 ./autogen.sh && ./configure && make
-      to generate a new Makefile.
+	    Is neccessary execute
+	      ./autogen.sh && ./configure && make
+	    to generate a new Makefile.
 
 september 2017
 	- 1.4.2
