@@ -27,16 +27,37 @@ OBJS = $(SRCS:.c=.o)
 
 .SUFFIXES: .c .o
 
-.c.o:
-	$(CC) $(DEFS) $(CFLAGS) $(CPPFLAGS) -c $<
+DEPDIR = .d
+$(shell mkdir -p $(DEPDIR) >/dev/null)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
+POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
+
+#$(shell for X in $(SRCS); do \
+#			XXd=$$(echo $$X | sed -e 's/^/$(DEPDIR)\//' | sed -e 's/\.c$$/\.d/'); \
+#            if ! [ -f $$XXd ]; then \
+#				touch $$XXd; \
+#            fi; \
+#		done)
 
 all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
+%.o : %.c
+%.o : %.c $(DEPDIR)/%.d
+	$(CC) $(DEPFLAGS) $(DEFS) $(CFLAGS) $(CPPFLAGS) -c $<
+	$(POSTCOMPILE)
+
+$(DEPDIR)/%.d: FORCE;
+.PRECIOUS: $(DEPDIR)/%.d
+
+include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS))))
+
+FORCE:
+
 clean:
-	rm -rf *~ *.o core *.cache config.status config.log $(PRODUCT) $(PRODUCT).1
+	rm -rf *~ *.o core *.cache config.status config.log $(PRODUCT) $(PRODUCT).1 .d
 
 distclean: clean
 	rm -f Makefile config.h Makefile-build

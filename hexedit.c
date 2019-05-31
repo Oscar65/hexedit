@@ -66,48 +66,45 @@ int main(int argc, char **argv)
   progName = basename(argv[0]);
   argv++; argc--;
   for (; argc > 0; argv++, argc--) 
-    {
-      if (streq(*argv, "-s") || streq(*argv, "--sector"))
-	mode = bySector;
-      else if (streq(*argv, "-v") || streq(*argv, "--version")) {
-        printf("version 1.4.10\n\n");
-   	printf("Copyright (C) 1998 Pixel (Pascal Rigaux). Updated by Oscar Megía López <megia.oscar@gmail.com>.\n");
-   	printf("This program is free software; you can redistribute it and/or modify\n");
-   	printf("it under the terms of the GNU General Public License as published by\n");
-   	printf("the Free Software Foundation; either version 2, or (at your option)\n");
- 	printf("any later version.\n\n");
+  {
+    if (streq(*argv, "-s") || streq(*argv, "--sector"))
+      mode = bySector;
+    else if (streq(*argv, "-v") || streq(*argv, "--version")) {
+      printf("version 1.4.11\n\n");
+      printf("Copyright (C) 1998 Pixel (Pascal Rigaux).\n");
+      printf("This program is free software; you can redistribute it and/or modify\n");
+      printf("it under the terms of the GNU General Public License as published by\n");
+      printf("the Free Software Foundation; either version 2, or (at your option)\n");
+      printf("any later version.\n\n");
+      printf("This program is distributed in the hope that it will be useful,\n");
+      printf("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
+      printf("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
+      printf("GNU General Public License for more details <http://gnu.org/licenses/gpl.html>.\n\n");
+      printf("You should have received a copy of the GNU General Public License\n");
 
-   	printf("This program is distributed in the hope that it will be useful,\n");
-   	printf("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
-   	printf("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
-   	printf("GNU General Public License for more details <http://gnu.org/licenses/gpl.html>.\n\n");
-
-   	printf("You should have received a copy of the GNU General Public License\n");
-
-	return 0;
-      } else if (streq(*argv, "-m") || streq(*argv, "--maximize"))
-	mode = maximized;
+      return 0;
+    } else if (streq(*argv, "-m") || streq(*argv, "--maximize"))
+      mode = maximized;
 #ifdef HAVE_COLORS
-      else if (streq(*argv, "--color"))
-	colored = TRUE;
+    else if (streq(*argv, "--color"))
+      colored = TRUE;
 #endif
-      else if (strbeginswith(*argv, "-l") || strbeginswith(*argv, "--linelength")) {
-	if (strbeginswith(*argv, "-l") && strlen(*argv) > 2)
-	  lineLength = atoi(*argv + 2);
-	else {
-	  argv++; argc--;
-	  lineLength = atoi(*argv);
-	}
-	if (lineLength < 0 || lineLength > 4096)
-	  DIE("illegal line length\n")
-      } else if (streq(*argv, "--")) {
-	argv++; argc--;
-	break;
-      } else if (*argv[0] == '-')
-
-	DIE(usage)
-      else break;
-    }
+    else if (strbeginswith(*argv, "-l") || strbeginswith(*argv, "--linelength")) {
+     if (strbeginswith(*argv, "-l") && strlen(*argv) > 2)
+       lineLength = atoi(*argv + 2);
+     else {
+       argv++; argc--;
+       lineLength = atoi(*argv);
+     }
+     if (lineLength < 0 || lineLength > 4096)
+       DIE("illegal line length\n")
+     } else if (streq(*argv, "--")) {
+       argv++; argc--;
+       break;
+     } else if (*argv[0] == '-')
+       DIE(usage)
+     else break;
+  }
   if (argc > 1) DIE(usage);
 
   init();

@@ -121,7 +121,7 @@ void initCurses(void)
 {
   struct sigaction sa;
   if ((initscr()) == NULL) {
-    fprintf(stderr, "Error calling ncurses initscr.\n");
+    fprintf(stderr, "%s:%d Error calling ncurses initscr.\n", __FILE__, __LINE__);
     exit(EXIT_FAILURE);
   }
 
@@ -186,10 +186,10 @@ void exitCurses(void)
     fprintf(stderr, "%s:%d Error calling ncurses refresh.\n", __FILE__, __LINE__);
   }
   if (delwin(stdscr) == ERR) {
-    fprintf(stderr, "Error calling ncurses delwin.\n");
+    fprintf(stderr, "%s:%d Error calling ncurses delwin.\n", __FILE__, __LINE__);
   }
   if (endwin() == ERR) {
-    fprintf(stderr, "Error calling ncurses endwin.\n");
+    fprintf(stderr, "%s:%d Error calling ncurses endwin.\n", __FILE__, __LINE__);
     exit(EXIT_FAILURE);
   }
 }
@@ -223,7 +223,11 @@ void display(void)
   else i = '-';
   printw("%c%c 0x%llX", i, i, base + cursor);
   if (MAX(fileSize, lastEditedLoc)) printw("/0x%llX", getfilesize());
-  printw("--%i%%", 100 * (base + cursor + getfilesize()/200) / getfilesize() );
+  if (getfilesize() > 0) {
+      printw("--%i%%", 100 * (base + cursor + getfilesize()/200) / getfilesize() );
+  } else {
+      printw("-- 0%%");
+  }
   if (mode == bySector) printw("--sector %lld", (base + cursor) / SECTOR_SIZE);
   if (mark_set) printw("--sel 0x%llX/0x%llX--size 0x%llX", mark_min, mark_max, mark_max - mark_min + 1);
   printw(" %s", baseName);
